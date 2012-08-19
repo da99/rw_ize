@@ -21,11 +21,16 @@ rw.funcs =
       target.write_ables ?= []
       target.write_ables.push prop
     
-  write_able_bool: (args...) ->
-    @write_able(args...)
-
-  read_write_able_bool: (args...) ->
+  read_able_bool: (args...) ->
     @read_able(args...)
+    target = this.prototype or this
+    for b in args
+      target[b] = () ->
+        not not @rw_data()[this.rw_name]
+      target[b].rw_name = b
+    
+    
+  write_able_bool: (args...) ->
     @write_able(args...)
     target = this.prototype or this
     for b in args
@@ -39,13 +44,17 @@ rw.funcs =
             throw new Error("Unknown arguments: #{arguments.join(', ')}")
       target[b].rw_name = b
 
+  read_write_able_bool: (args...) ->
+    @read_able_bool(args...)
+    @write_able_bool(args...)
+
   write: (prop, val) ->
     if !(prop in this['write_ables'])
       throw new Error("#{prop} is not write_able.")
     @rw_data()[prop] = val
     
 rw.on_prototype = ["write", "rw_data"]
-rw.on_this = ["read_able", "write_able", "read_write_able", "read_able_bool", "read_write_able_bool"]
+rw.on_this = ["read_able", "write_able", "read_write_able", "read_able_bool", "write_able_bool", "read_write_able_bool"]
     
 exports.ize = (klass) ->
   me = arguments.callee

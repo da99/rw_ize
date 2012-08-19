@@ -52,6 +52,19 @@ describe "rw_ize", () ->
       u.write "price", "$8"
       assert.equal u.price(), "$8"
       
+  describe "read_able_bool", () ->
+
+    it "adds a read method to the prototype", () ->
+
+      class Truck
+        rw.ize(this)
+        @read_able_bool "on"
+        constructor: () ->
+
+      t = new Truck()
+      assert.equal t.on(), false
+
+
   describe "read_write_able_bool", () ->
 
     it "adds both a read and write method to the prototype", () ->
