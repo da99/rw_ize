@@ -36,7 +36,7 @@ In your coffeescript:
     cake.for_sale(true)
     cake.for_sale() # --> true
 
-You can use it on objects:
+You can also use it directly on objects:
 
     car = {}
     rw.ize(car)
