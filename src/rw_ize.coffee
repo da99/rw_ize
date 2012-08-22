@@ -24,9 +24,10 @@ rw.funcs =
   read_able_bool: (args...) ->
     @read_able(args...)
     target = this.prototype or this
+    me = arguments.callee.rw_name
     for b in args
       target[b] = () ->
-        not not @rw_data()[this.rw_name]
+        not not @rw_data()[me]
       target[b].rw_name = b
     
     
@@ -35,11 +36,12 @@ rw.funcs =
     target = this.prototype or this
     for b in args
       target[b] = (val) ->
+        me = arguments.callee.rw_name
         switch arguments.length
           when 0
-            not not @rw_data()[this.rw_name]
+            not not @rw_data()[me]
           when 1
-            @rw_data()[this.rw_name] = (not not val)
+            @rw_data()[me] = (not not val)
           else
             throw new Error("Unknown arguments: #{arguments.join(', ')}")
       target[b].rw_name = b

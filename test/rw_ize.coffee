@@ -88,4 +88,15 @@ describe "rw_ize", () ->
       ship.afloat(true)
       assert.equal ship.afloat(), true
       
+    it "adds a seperate read/write method for each different bool", () ->
+      ship = {}
+      rw.ize(ship)
+      ship.read_write_able_bool "afloat"
+      ship.read_write_able_bool "sinking"
+      
+      ship.afloat(true)
+      assert.equal ship.afloat(), true
+      assert.equal ship.sinking(), false
+      
+
 
