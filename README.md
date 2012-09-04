@@ -25,7 +25,7 @@ In your coffeescript:
        read_write_able_bool "for_sale"
 
        constructor(name):
-         @rw_data().size = "3.5 inches"
+         @rw_data "size", "3.5 inches"
          @write "name", name
 
     cake = new Pancake("Bob")

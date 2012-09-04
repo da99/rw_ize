@@ -3,6 +3,32 @@ assert = require "assert"
 
 describe "rw_ize", () ->
 
+  describe "rw_data(k, v)", () ->
+    
+    it "sets value of key", () ->
+      obj = {}
+      rw.ize(obj)
+      obj.read_able "name"
+      obj.rw_data("name", "ted")
+      assert.equal obj.name(), "ted"
+      
+    it "returns obj if called w/o args.", () ->
+      obj = {}
+      rw.ize(obj)
+      obj.read_able "name"
+      obj.rw_data("name", "ted")
+      assert.deepEqual obj.rw_data(), { name: "ted" }
+
+    it "raise an error if trying to set an unknown key", () ->
+      obj = {}
+      rw.ize(obj)
+      obj.read_able "name"
+      err = try
+        obj.rw_data("names", "ted")
+      catch e
+        e
+      assert.deepEqual err.message, "Unknown key being set: names"
+
   describe "read_able", () ->
 
     it "adds a method to the prototype", () ->
@@ -64,6 +90,17 @@ describe "rw_ize", () ->
       t = new Truck()
       assert.equal t.on(), false
 
+    it "reads from manually set value", () ->
+
+      class Truck
+        rw.ize(this)
+        @read_able_bool "on"
+        constructor: () ->
+          @rw_data "on", true
+
+      t = new Truck()
+      assert.equal t.on(), true
+
 
   describe "read_write_able_bool", () ->
 
@@ -98,5 +135,15 @@ describe "rw_ize", () ->
       assert.equal ship.afloat(), true
       assert.equal ship.sinking(), false
       
+    it "reads from manually set value", () ->
+
+      class Sailboat
+        rw.ize(this)
+        @read_write_able_bool "engine_on"
+        constructor: () ->
+          @rw_data "engine_on", true
+
+      t = new Sailboat()
+      assert.equal t.engine_on(), true
 
 
