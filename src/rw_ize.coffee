@@ -1,3 +1,4 @@
+"use strict"
 
 rw = {}
 rw.funcs = 
@@ -25,9 +26,9 @@ rw.funcs =
     target = this.prototype or this
     for prop in args
       target.rw_keys().push prop
-      target[prop] = () ->
-        @rw_data()[arguments.callee.rw_name]
-      target[prop].rw_name = prop
+      target[prop] = new Function """
+          return this.rw_data()["#{prop}"];  
+      """
       
   write_able:  (args...) ->
     target = this.prototype or this
@@ -39,25 +40,33 @@ rw.funcs =
     @read_able(args...)
     target = this.prototype or this
     for b in args
-      target[b] = () ->
-        not not @rw_data()[arguments.callee.rw_name]
-      target[b].rw_name = b
+      target[b] = new Function """
+          return !!this.rw_data()["#{b}"];
+      """
     
     
   write_able_bool: (args...) ->
     @write_able(args...)
     target = this.prototype or this
     for b in args
-      target[b] = (val) ->
-        me = arguments.callee
-        switch arguments.length
-          when 0
-            not not @rw_data()[me.rw_name]
-          when 1
-            @rw_data()[me.rw_name] = (not not val)
-          else
-            throw new Error("Unknown arguments: #{arguments.join(', ')}")
-      target[b].rw_name = b
+      target[b] = new Function 'val', """
+      
+        var prop = "#{b}";
+        var data = this.rw_data();
+        var final = null;
+
+        switch( arguments.length ) {
+          case 0:
+            final = !!data[prop];
+            break;
+          case 1:
+            final = ( data[prop] = !!val);
+            break;
+          default:
+            throw new Error("Unknown arguments: " + arguments.join(', '));
+        };
+        return final;
+      """
 
   read_write_able_bool: (args...) ->
     @read_able_bool(args...)
@@ -72,8 +81,7 @@ rw.on_prototype = ["write", "rw_keys", "rw_data"]
 rw.on_this = ["read_able", "write_able", "read_write_able", "read_able_bool", "write_able_bool", "read_write_able_bool"]
     
 exports.ize = (klass) ->
-  this_func = arguments.callee
-  return null if this_func.read_able
+  return null if klass.read_able
 
   proto = klass.prototype or klass
   
