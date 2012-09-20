@@ -3,23 +3,23 @@ assert = require "assert"
 
 describe "rw_ize", () ->
 
-  describe "read_or_write(k, v)", () ->
+  describe "rw(k, v)", () ->
     
     it "sets value of key", () ->
       obj = {}
       rw.ize(obj)
       obj.read_able "name"
-      obj.read_or_write("name", "ted")
+      obj.rw "name", "ted"
       assert.equal obj.name(), "ted"
       
     it "throws error if called w/o args.", () ->
       obj = {}
       rw.ize(obj)
       obj.read_able "name"
-      obj.read_or_write("name", "ted")
+      obj.rw "name", "ted"
       err = null
       try
-        obj.read_or_write()
+        obj.rw()
       catch e
         err = e
       assert.deepEqual err.message, "Key not found: undefined"
@@ -29,7 +29,7 @@ describe "rw_ize", () ->
       rw.ize(obj)
       obj.read_able "name"
       err = try
-        obj.read_or_write("names", "ted")
+        obj.rw("names", "ted")
       catch e
         e
       assert.deepEqual err.message, "Key not found: names"
@@ -42,7 +42,7 @@ describe "rw_ize", () ->
         rw.ize(this)
         @read_able "year"
         constructor: () ->
-          @read_or_write 'year', "1999"
+          @rw 'year', "1999"
 
       c = new Car()
       assert.equal c.year(), "1999"
@@ -52,7 +52,7 @@ describe "rw_ize", () ->
       car = {}
       rw.ize(car)
       car.read_able "price"
-      car.read_or_write 'price', "$10"
+      car.rw 'price', "$10"
       assert.equal car.price(), "$10"
 
   describe "write_able", () ->
@@ -66,7 +66,7 @@ describe "rw_ize", () ->
           
       s = new Spaceship()
       s.location "NYC"
-      assert.equal s.read_or_write('location'), "NYC"
+      assert.equal s.rw('location'), "NYC"
       
       
   describe "read_write_able", () ->
@@ -77,7 +77,7 @@ describe "rw_ize", () ->
         rw.ize(this)
         @read_write_able "price"
         constructor: () ->
-          @read_or_write 'price', "$7"
+          @rw 'price', "$7"
       u = new Unicycle()
       assert.equal u.price(), "$7"
       u.price "$8"
@@ -101,7 +101,7 @@ describe "rw_ize", () ->
         rw.ize(this)
         @read_able_bool "on"
         constructor: () ->
-          @read_or_write "on", true
+          @rw "on", true
 
       t = new Truck()
       assert.equal t.on(), true
@@ -146,7 +146,7 @@ describe "rw_ize", () ->
         rw.ize(this)
         @read_write_able_bool "engine_on"
         constructor: () ->
-          @read_or_write "engine_on", true
+          @rw "engine_on", true
 
       t = new Sailboat()
       assert.equal t.engine_on(), true

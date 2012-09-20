@@ -4,11 +4,13 @@ class RW_Key
 
   @reader_code: (prop) -> 
     """
-      if ( arguments.length == 0 )
+      if ( arguments.length == 0 ) {
         this.throw_unless_rw( '#{prop}', 'read' );
-      else
+        return this.rw( "#{prop}" );
+      } else {
         this.throw_unless_rw( '#{prop}', 'write' );
-      return this.read_or_write.apply( this, ["#{prop}"].concat( Array.prototype.slice.call(arguments) ) );
+        return this.rw.apply( this, ["#{prop}"].concat( Array.prototype.slice.call(arguments) ) );
+      };
     """
   constructor: (n) ->
     @_name_          = n
@@ -120,24 +122,32 @@ rw.instance_dsl =
       throw new Error "Key is not #{action}_able: #{name}"
     true
     
-  read_or_write: (args...) ->
+  rw: () ->
     @_rw_data_ ?= {}
     d = @_rw_data_
     
-    key_name = args[0]
-    value    = args[1]
+    action = if arguments.length is 1
+      'read'
+    else if arguments.length is 2
+      'write'
+    else
+      undefined
+
+    key_name = arguments[0]
+    raw_value = arguments[1]
     key = @rw_key key_name
     
     if not key
       throw new Error "Key not found: #{key_name}"
     
-    switch args.length
-      when 2 # name, val => WRITE
-        if key.is_bool()
-          value = not not value
-        d[key.name()] = value
+    switch action
+      when 'write'
+        d[key.name()] = if key.is_bool()
+          not not raw_value
+        else
+          raw_value
 
-      when 1 # name => READ
+      when 'read'
         value = d[key.name()] 
         if key.is_bool()
           not not value
