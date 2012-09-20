@@ -3,31 +3,36 @@ assert = require "assert"
 
 describe "rw_ize", () ->
 
-  describe "rw_data(k, v)", () ->
+  describe "read_or_write(k, v)", () ->
     
     it "sets value of key", () ->
       obj = {}
       rw.ize(obj)
       obj.read_able "name"
-      obj.rw_data("name", "ted")
+      obj.read_or_write("name", "ted")
       assert.equal obj.name(), "ted"
       
-    it "returns obj if called w/o args.", () ->
+    it "throws error if called w/o args.", () ->
       obj = {}
       rw.ize(obj)
       obj.read_able "name"
-      obj.rw_data("name", "ted")
-      assert.deepEqual obj.rw_data(), { name: "ted" }
+      obj.read_or_write("name", "ted")
+      err = null
+      try
+        obj.read_or_write()
+      catch e
+        err = e
+      assert.deepEqual err.message, "Key not found: undefined"
 
     it "raise an error if trying to set an unknown key", () ->
       obj = {}
       rw.ize(obj)
       obj.read_able "name"
       err = try
-        obj.rw_data("names", "ted")
+        obj.read_or_write("names", "ted")
       catch e
         e
-      assert.deepEqual err.message, "Unknown key being set: names"
+      assert.deepEqual err.message, "Key not found: names"
 
   describe "read_able", () ->
 
@@ -37,7 +42,7 @@ describe "rw_ize", () ->
         rw.ize(this)
         @read_able "year"
         constructor: () ->
-          @rw_data().year = "1999"
+          @read_or_write 'year', "1999"
 
       c = new Car()
       assert.equal c.year(), "1999"
@@ -47,7 +52,7 @@ describe "rw_ize", () ->
       car = {}
       rw.ize(car)
       car.read_able "price"
-      car.rw_data().price = "$10"
+      car.read_or_write 'price', "$10"
       assert.equal car.price(), "$10"
 
   describe "write_able", () ->
@@ -60,8 +65,8 @@ describe "rw_ize", () ->
         constructor: () ->
           
       s = new Spaceship()
-      s.write "location", "NYC"
-      assert.equal s.rw_data().location, "NYC"
+      s.location "NYC"
+      assert.equal s.read_or_write('location'), "NYC"
       
       
   describe "read_write_able", () ->
@@ -72,10 +77,10 @@ describe "rw_ize", () ->
         rw.ize(this)
         @read_write_able "price"
         constructor: () ->
-          @rw_data().price = "$7"
+          @read_or_write 'price', "$7"
       u = new Unicycle()
       assert.equal u.price(), "$7"
-      u.write "price", "$8"
+      u.price "$8"
       assert.equal u.price(), "$8"
       
   describe "read_able_bool", () ->
@@ -96,7 +101,7 @@ describe "rw_ize", () ->
         rw.ize(this)
         @read_able_bool "on"
         constructor: () ->
-          @rw_data "on", true
+          @read_or_write "on", true
 
       t = new Truck()
       assert.equal t.on(), true
@@ -141,9 +146,22 @@ describe "rw_ize", () ->
         rw.ize(this)
         @read_write_able_bool "engine_on"
         constructor: () ->
-          @rw_data "engine_on", true
+          @read_or_write "engine_on", true
 
       t = new Sailboat()
       assert.equal t.engine_on(), true
 
+
+  describe "private_ize", () -> 
+
+    it "throws an error if read method is used as a writer", () ->
+      ship = {}
+      rw.ize(ship)
+      ship.private_ize "color"
+      ship.read_able "color"
+      try 
+        ship.color "red"
+      catch e
+        err = e
+      assert.equal err.message, "Key is not write_able: color"
 
